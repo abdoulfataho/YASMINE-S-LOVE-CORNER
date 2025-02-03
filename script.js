@@ -70,7 +70,60 @@ document.addEventListener('DOMContentLoaded', () => {
         displayNotes();
     }
 
+    function showThankYouPage() {
+        const thankYouPage = document.getElementById('thank-you-page');
+        const currentDateDisplay = document.getElementById('current-date-display');
+        const postTime = document.getElementById('post-time');
+        const countdownTimer = document.getElementById('countdown-timer');
+        
+        // Hide all other sections
+        loginPage.classList.add('hidden');
+        poemSection.classList.add('hidden');
+        noteSection.classList.add('hidden');
+        
+        // Show thank you page
+        thankYouPage.classList.remove('hidden');
+        
+        // Set current date and time
+        currentDateDisplay.textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        postTime.textContent = new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Start countdown to next day
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    }
+
+    function updateCountdown() {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+        
+        const timeLeft = tomorrow - now;
+        
+        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+        
+        document.getElementById('countdown-timer').textContent = 
+            `${hours}h ${minutes}m ${seconds}s`;
+    }
+
     function postNote() {
+        if (hasPostedToday()) {
+            alert("You've already shared your thoughts for today!");
+            return;
+        }
+
         if (!capturedImage || !writtenNote.value.trim()) {
             alert('Please capture a photo and write a note before posting.');
             return;
@@ -87,9 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
         storedNotes.push(newNote);
         localStorage.setItem('poetryNotes', JSON.stringify(storedNotes));
         
-        displayNotes();
-        resetNoteForm();
         stopCamera();
+        showThankYouPage(); // Show the thank you page instead of the previous alert
     }
 
     function displayNotes() {
