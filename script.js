@@ -53,21 +53,57 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUser = name;
         
         if (name === 'yasmine') {
-            loginPage.classList.add('hidden');
-            landingPage.classList.remove('hidden');
+            if (hasPostedToday()) {
+                showThankYouPage();
+            } else {
+                loginPage.classList.add('hidden');
+                currentPoemIndex = getTodaysPoemIndex();
+                poemSection.classList.remove('hidden');
+                displayCurrentPoem();
+            }
         } else if (name === 'abdoul') {
             loginPage.classList.add('hidden');
-            showStoredNotes();
+            showAbdoulDashboard();
         } else {
             alert('Welcome! This is a private poetry corner for Abdoul and Yasmine.');
             visitorName.value = '';
         }
     }
 
-    function showStoredNotes() {
-        notesDisplay.classList.remove('hidden');
+    function showAbdoulDashboard() {
+        noteSection.innerHTML = `
+            <h2>Leave a Note for Yasmine</h2>
+            <div class="abdoul-dashboard">
+                <div class="note-input">
+                    <textarea id="written-note" placeholder="Write a special note for Yasmine..."></textarea>
+                    <button id="post-abdoul-note">Send Note</button>
+                </div>
+                <div class="previous-notes">
+                    <h3>Previous Notes</h3>
+                    <div id="abdoul-notes-history"></div>
+                </div>
+            </div>
+        `;
+        
         noteSection.classList.remove('hidden');
-        displayNotes();
+        
+        // Add event listener for the new note button
+        document.getElementById('post-abdoul-note').addEventListener('click', handleAbdoulNote);
+        
+        // Display previous notes
+        displayAbdoulNotes();
+    }
+
+    function displayAbdoulNotes() {
+        const abdoulNotes = JSON.parse(localStorage.getItem('abdoulNotes') || '[]');
+        const historyContainer = document.getElementById('abdoul-notes-history');
+        
+        historyContainer.innerHTML = abdoulNotes.reverse().map(note => `
+            <div class="note-card">
+                <p>${note.text}</p>
+                <span class="note-time">${new Date(note.timestamp).toLocaleString()}</span>
+            </div>
+        `).join('');
     }
 
     function showThankYouPage() {
@@ -75,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentDateDisplay = document.getElementById('current-date-display');
         const postTime = document.getElementById('post-time');
         const countdownTimer = document.getElementById('countdown-timer');
+        const abdoulMessageDisplay = document.getElementById('abdoul-message');
         
         // Hide all other sections
         loginPage.classList.add('hidden');
@@ -83,6 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Show thank you page
         thankYouPage.classList.remove('hidden');
+        
+        // Add return home button functionality
+        addReturnHomeButton();
         
         // Set current date and time
         currentDateDisplay.textContent = new Date().toLocaleDateString('en-US', {
@@ -97,9 +137,25 @@ document.addEventListener('DOMContentLoaded', () => {
             minute: '2-digit'
         });
         
-        // Start countdown to next day
+        // Display Abdoul's latest note if it exists
+        const abdoulNote = getLatestAbdoulNote();
+        if (abdoulNote) {
+            abdoulMessageDisplay.innerHTML = `
+                <div class="abdoul-note">
+                    <h3>A Note from Abdoul</h3>
+                    <p>${abdoulNote.text}</p>
+                    <span class="note-time">${new Date(abdoulNote.timestamp).toLocaleTimeString()}</span>
+                </div>
+            `;
+            abdoulMessageDisplay.classList.remove('hidden');
+        }
+        
+        // Update countdown every second
         updateCountdown();
-        setInterval(updateCountdown, 1000);
+        const countdownInterval = setInterval(updateCountdown, 1000);
+
+        // Store countdown interval for cleanup
+        window.countdownInterval = countdownInterval;
     }
 
     function updateCountdown() {
@@ -114,8 +170,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
         
-        document.getElementById('countdown-timer').textContent = 
-            `${hours}h ${minutes}m ${seconds}s`;
+        const countdownTimer = document.getElementById('countdown-timer');
+        
+        // Format numbers to always show two digits
+        const formatNumber = (num) => String(num).padStart(2, '0');
+        
+        countdownTimer.innerHTML = `
+            <div class="countdown-container">
+                <div class="countdown-block">
+                    <span class="countdown-number">${formatNumber(hours)}</span>
+                    <span class="countdown-label">hours</span>
+                </div>
+                <div class="countdown-separator">:</div>
+                <div class="countdown-block">
+                    <span class="countdown-number">${formatNumber(minutes)}</span>
+                    <span class="countdown-label">minutes</span>
+                </div>
+                <div class="countdown-separator">:</div>
+                <div class="countdown-block">
+                    <span class="countdown-number">${formatNumber(seconds)}</span>
+                    <span class="countdown-label">seconds</span>
+                </div>
+            </div>
+        `;
+
+        // If we reach the next day, reload the page
+        if (timeLeft <= 0) {
+            window.location.reload();
+        }
     }
 
     function postNote() {
@@ -298,4 +380,69 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Clean up when leaving the page
     window.addEventListener('beforeunload', stopCamera);
+
+    function handleAbdoulNote() {
+        const abdoulNote = {
+            author: 'abdoul',
+            text: writtenNote.value.trim(),
+            timestamp: new Date().toISOString(),
+        };
+
+        const abdoulNotes = JSON.parse(localStorage.getItem('abdoulNotes') || '[]');
+        abdoulNotes.push(abdoulNote);
+        localStorage.setItem('abdoulNotes', JSON.stringify(abdoulNotes));
+        
+        alert('Your note has been saved for Yasmine to see!');
+        writtenNote.value = '';
+    }
+
+    function getLatestAbdoulNote() {
+        const abdoulNotes = JSON.parse(localStorage.getItem('abdoulNotes') || '[]');
+        return abdoulNotes[abdoulNotes.length - 1];
+    }
+
+    function addReturnHomeButton() {
+        const returnButton = document.getElementById('return-home');
+        if (!returnButton) return; // Safety check
+
+        // Remove any existing listeners to prevent duplicates
+        returnButton.replaceWith(returnButton.cloneNode(true));
+        
+        // Get the fresh reference after replacement
+        const newReturnButton = document.getElementById('return-home');
+        
+        newReturnButton.addEventListener('click', returnToHome);
+    }
+
+    // Separate function for returning home
+    function returnToHome() {
+        // Clear any existing intervals
+        if (window.countdownInterval) {
+            clearInterval(window.countdownInterval);
+        }
+
+        // Reset all sections
+        const allSections = [
+            'thank-you-page',
+            'poem-section',
+            'note-section'
+        ];
+        
+        allSections.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.classList.add('hidden');
+            }
+        });
+
+        // Show login page and reset input
+        const loginPage = document.getElementById('login-page');
+        const visitorName = document.getElementById('visitor-name');
+        
+        loginPage.classList.remove('hidden');
+        visitorName.value = '';
+
+        // Reset any stored current user
+        currentUser = '';
+    }
 }); 
