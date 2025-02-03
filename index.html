@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abdoul & Yasmine's Poetry Corner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div id="login-page">
+            <h1>Welcome to Our Poetry Corner</h1>
+            <div id="current-date"></div>
+            <div class="login-form">
+                <input type="text" id="visitor-name" placeholder="Please enter your name..." />
+                <button id="login-btn">Enter</button>
+            </div>
+        </div>
+
+        <div id="landing-page" class="hidden">
+            <h1>Welcome to Abdoul & Yasmine's Poetry Corner</h1>
+            <div id="current-date"></div>
+            <p class="welcome-note">Step into our world of words and emotions...</p>
+            <button id="mood-btn">Are you ready for today's poem?</button>
+        </div>
+
+        <div id="poem-section" class="hidden">
+            <h2>Poem of the Day</h2>
+            <div id="poem-content"></div>
+            <div class="feedback-buttons">
+                <button id="like-btn">I loved it! ❤️</button>
+                <button id="next-btn">Show me another</button>
+            </div>
+        </div>
+
+        <div id="note-section" class="hidden">
+            <h2>Share Your Thoughts</h2>
+            <div id="camera-container">
+                <video id="camera-feed" autoplay playsinline></video>
+                <canvas id="photo-canvas" class="hidden"></canvas>
+                <div id="camera-controls" class="hidden">
+                    <button id="switch-camera">Switch Camera</button>
+                    <button id="capture-btn">Capture Photo</button>
+                    <button id="save-photo" class="hidden">Use Photo</button>
+                </div>
+            </div>
+            <div class="note-input">
+                <textarea id="written-note" placeholder="Write your thoughts about the poem..."></textarea>
+                <button id="post-note-btn">Post Note</button>
+            </div>
+            <div id="notes-display"></div>
+        </div>
+    </div>
+    <script src="poems.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 

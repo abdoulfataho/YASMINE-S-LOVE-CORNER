@@ -1,0 +1,508 @@
+:root {
+    --primary-color: #ff6b6b;
+    --secondary-color: #4ecdc4;
+    --accent-color: #ffe66d;
+    --text-primary: #2d3436;
+    --text-secondary: #636e72;
+    --gradient-1: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);
+    --gradient-2: linear-gradient(45deg, #4ecdc4 0%, #6c5ce7 100%);
+    --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Quicksand', sans-serif;
+    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    min-height: 100vh;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+h1 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    background: var(--gradient-1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+}
+
+h1::after {
+    content: '';
+    display: block;
+    width: 100px;
+    height: 3px;
+    background: var(--gradient-1);
+    margin: 10px auto;
+    border-radius: 2px;
+}
+
+#current-date {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+.welcome-note {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+button {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 25px;
+    background: var(--gradient-2);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(45deg, #6c5ce7 0%, #4ecdc4 100%);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+.hidden {
+    display: none;
+}
+
+#poem-content {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    margin: 2rem 0;
+    box-shadow: var(--shadow);
+    position: relative;
+    border: 1px solid rgba(78, 205, 196, 0.2);
+}
+
+#poem-content::before {
+    content: '"';
+    position: absolute;
+    top: -20px;
+    left: 20px;
+    font-size: 4rem;
+    color: var(--primary-color);
+    opacity: 0.3;
+}
+
+#poem-content h3 {
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+#poem-content p {
+    line-height: 1.8;
+    color: var(--text-secondary);
+    white-space: pre-line;
+}
+
+#camera-container {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #000;
+}
+
+#camera-feed, #photo-canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 20px;
+}
+
+#camera-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0 1rem;
+    z-index: 10;
+}
+
+#camera-controls button {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid white;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    backdrop-filter: blur(4px);
+}
+
+#camera-controls button:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+#save-photo {
+    background: var(--primary-color) !important;
+}
+
+#notes-display {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+}
+
+#notes-display h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+#notes-display img {
+    border-radius: 15px;
+    border: 2px solid var(--accent-color);
+}
+
+/* Add decorative elements */
+.container::before,
+.container::after {
+    content: '';
+    position: fixed;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    z-index: -1;
+}
+
+.container::before {
+    top: -100px;
+    left: -100px;
+    background: radial-gradient(circle, var(--accent-color) 0%, rgba(255, 230, 109, 0) 70%);
+}
+
+.container::after {
+    bottom: -100px;
+    right: -100px;
+    background: radial-gradient(circle, var(--secondary-color) 0%, rgba(78, 205, 196, 0) 70%);
+}
+
+/* Media Queries for Responsiveness */
+
+/* Large screens (above 1200px) */
+@media screen and (min-width: 1200px) {
+    .container {
+        max-width: 1000px;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    #poem-content {
+        padding: 3rem;
+        margin: 3rem auto;
+    }
+}
+
+/* Medium screens (768px - 1199px) */
+@media screen and (max-width: 1199px) {
+    .container {
+        max-width: 90%;
+        padding: 1.5rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    button {
+        padding: 0.8rem 1.6rem;
+        font-size: 1rem;
+    }
+}
+
+/* Small screens (481px - 767px) */
+@media screen and (max-width: 767px) {
+    .container {
+        padding: 1rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        margin-bottom: 0.8rem;
+    }
+
+    #current-date {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .welcome-note {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    button {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+
+    #poem-content {
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .feedback-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* Mobile screens (under 480px) */
+@media screen and (max-width: 480px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    #current-date {
+        font-size: 0.9rem;
+    }
+
+    .welcome-note {
+        font-size: 0.9rem;
+    }
+
+    button {
+        padding: 0.7rem 1.4rem;
+        font-size: 0.9rem;
+    }
+
+    #poem-content {
+        padding: 1rem;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+    }
+
+    #camera-container {
+        width: 100%;
+    }
+
+    #camera-feed, #photo-canvas {
+        margin: 0.5rem 0;
+    }
+
+    #notes-display {
+        margin-top: 1rem;
+        padding: 0.8rem;
+    }
+}
+
+/* Handle landscape orientation on mobile */
+@media screen and (max-height: 480px) and (orientation: landscape) {
+    .container {
+        padding: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    #current-date {
+        margin-bottom: 1rem;
+    }
+
+    .welcome-note {
+        margin-bottom: 1rem;
+    }
+
+    #poem-content {
+        margin: 1rem 0;
+    }
+
+    button {
+        padding: 0.5rem 1rem;
+    }
+
+    #camera-container {
+        max-height: 60vh;
+        overflow: hidden;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-color: #ff9f43;
+        --secondary-color: #00d2d3;
+        --accent-color: #ffd32a;
+        --text-primary: #f5f6fa;
+        --text-secondary: #dcdde1;
+    }
+
+    body {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    }
+
+    .container {
+        background: rgba(44, 62, 80, 0.95);
+    }
+
+    #poem-content, #notes-display {
+        background: rgba(44, 62, 80, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    body {
+        background: white;
+    }
+
+    h1, #current-date, .welcome-note {
+        color: black;
+    }
+
+    button {
+        background: black;
+        color: white;
+        border: 2px solid black;
+    }
+
+    button:hover {
+        background: white;
+        color: black;
+    }
+
+    #poem-content, #notes-display {
+        border: 2px solid black;
+        background: white;
+        color: black;
+    }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    button {
+        transition: none;
+    }
+
+    button:hover {
+        transform: none;
+    }
+}
+
+/* Add these new styles to your existing CSS */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 300px;
+    margin: 2rem auto;
+}
+
+#visitor-name {
+    padding: 1rem;
+    border: 2px solid var(--secondary-color);
+    border-radius: 25px;
+    font-size: 1.1rem;
+    text-align: center;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+#visitor-name:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+}
+
+.note-input {
+    margin: 1rem 0;
+}
+
+#written-note {
+    width: 100%;
+    min-height: 100px;
+    padding: 1rem;
+    border: 2px solid var(--secondary-color);
+    border-radius: 15px;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    resize: vertical;
+}
+
+.note-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    margin: 1rem 0;
+    box-shadow: var(--shadow);
+}
+
+.note-card img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.note-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.note-timestamp {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+/* Make sure video fills container on mobile */
+@media (max-width: 768px) {
+    #camera-container {
+        max-width: 100%;
+        aspect-ratio: 4/3;
+    }
+    
+    #camera-feed, #photo-canvas {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+} 
