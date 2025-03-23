@@ -1,5 +1,13 @@
 const poems = [
     {
+        title: "First Poem",
+        content: "This is the first poem's content..."
+    },
+    {
+        title: "Second Poem",
+        content: "This is the second poem's content..."
+    },
+    {
         title: "Love's Dance",
         content: "In the rhythm of our hearts,\nAbdoul and Yasmine dance apart,\nYet connected by destiny's art,\nA love story about to start."
     },

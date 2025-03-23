@@ -1,167 +1,274 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Get DOM elements
+    // ====== DOM ELEMENTS ======
     const loginPage = document.getElementById('login-page');
     const visitorName = document.getElementById('visitor-name');
     const loginBtn = document.getElementById('login-btn');
     const poemSection = document.getElementById('poem-section');
-    const noteSection = document.getElementById('note-section');
-    const thankYouPage = document.getElementById('thank-you-page');
-    const returnHomeBtn = document.getElementById('return-home');
+    const conversationSection = document.getElementById('conversation-section');
+    const dateElement = document.getElementById('current-date');
+    
+    // Camera elements
+    const cameraFeed = document.getElementById('camera-feed');
+    const photoCanvas = document.getElementById('photo-canvas');
+    const captureBtn = document.getElementById('capture-btn');
+    const switchCameraBtn = document.getElementById('switch-camera');
 
-    // Initialize state
+    // ====== STATE VARIABLES ======
     let currentUser = '';
     let currentPoemIndex = Math.floor(Math.random() * poems.length);
-    let hasVisitedToday = false;
+    let capturedImage = null;
+    let currentStream = null;
 
-    // Show login page initially, hide others
-    function showInitialState() {
-        loginPage.classList.remove('hidden');
-        poemSection.classList.add('hidden');
-        noteSection.classList.add('hidden');
-        thankYouPage.classList.add('hidden');
+    // Update the conversations array to be empty initially
+    let conversations = [];
+
+    // ====== INITIALIZATION ======
+    function initialize() {
+        displayCurrentDate();
+        setupEventListeners();
+        setupCameraObserver();
     }
 
-    // Show initial state on load
-    showInitialState();
-
-    // Display current date
-    const dateElement = document.getElementById('current-date');
-    if (dateElement) {
-        const currentDate = new Date().toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-        dateElement.textContent = currentDate;
-    }
-
-    // Handle login
-    function handleLogin() {
-        const name = visitorName.value.trim().toLowerCase();
-        currentUser = name;
-        
-        if (name === 'yasmine') {
-            if (hasVisitedToday) {
-                showThankYouPage();
-            } else {
-                loginPage.classList.add('hidden');
-                poemSection.classList.remove('hidden');
-                displayCurrentPoem();
-            }
-        } else if (name === 'abdoul') {
-            loginPage.classList.add('hidden');
-            noteSection.classList.remove('hidden');
-        } else {
-            alert('Welcome! This is a private poetry corner for Abdoul and Yasmine.');
-            visitorName.value = '';
-        }
-    }
-
-    // Display current poem
-    function displayCurrentPoem() {
-        const poem = poems[currentPoemIndex];
-        const poemContent = document.getElementById('poem-content');
-        if (poemContent) {
-            poemContent.innerHTML = `
-                <h3>${poem.title}</h3>
-                <p>${poem.content}</p>
-                <div class="poem-feedback">
-                    <button id="like-btn">I loved it! ❤️</button>
-                    <button id="next-btn">Show me another</button>
-                </div>
-            `;
-        }
-    }
-
-    // Show thank you page
-    function showThankYouPage() {
-        loginPage.classList.add('hidden');
-        poemSection.classList.add('hidden');
-        noteSection.classList.add('hidden');
-        thankYouPage.classList.remove('hidden');
-        
-        // Update date and time
-        const currentDateDisplay = document.getElementById('current-date-display');
-        const postTime = document.getElementById('post-time');
-        
-        if (currentDateDisplay) {
-            currentDateDisplay.textContent = new Date().toLocaleDateString('en-US', {
+    function displayCurrentDate() {
+        if (dateElement) {
+            dateElement.textContent = new Date().toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
             });
         }
+    }
+
+    function setupEventListeners() {
+        loginBtn.addEventListener('click', handleLogin);
+        document.getElementById('next-btn')?.addEventListener('click', showNextPoem);
+        document.getElementById('capture-btn')?.addEventListener('click', capturePhoto);
+        document.getElementById('post-message-btn')?.addEventListener('click', postMessage);
+        document.getElementById('show-poem-btn')?.addEventListener('click', showPoemSection);
+        document.getElementById('show-conversation-btn')?.addEventListener('click', showConversationSection);
+    }
+
+    // ====== LOGIN FUNCTIONALITY ======
+    function handleLogin() {
+        const name = visitorName.value.trim().toLowerCase();
+        if (!name) {
+            alert('Please enter your name');
+            return;
+        }
         
-        if (postTime) {
-            postTime.textContent = new Date().toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
+        currentUser = name;
+        
+        if (name === 'yasmine') {
+            handleYasmineLogin();
+        } else if (name === 'abdoul') {
+            handleAbdoulLogin();
+        } else {
+            alert('Welcome! This is a private poetry corner for Abdoul and Yasmine.');
+            visitorName.value = '';
+        }
+    }
+
+    function handleYasmineLogin() {
+        loginPage.classList.add('hidden');
+        poemSection.classList.remove('hidden');
+        document.getElementById('show-conversation-btn').classList.remove('hidden');
+        
+        // Show message form for Yasmine
+        document.querySelector('.message-form').classList.remove('hidden');
+        
+        displayCurrentPoem();
+        fetchConversations();
+    }
+
+    function handleAbdoulLogin() {
+        loginPage.classList.add('hidden');
+        conversationSection.classList.remove('hidden');
+        document.getElementById('show-poem-btn').classList.remove('hidden');
+        
+        // Hide message form for Abdoul
+        document.querySelector('.message-form').classList.add('hidden');
+        
+        fetchConversations();
+    }
+
+    // ====== POEM FUNCTIONALITY ======
+    function displayCurrentPoem() {
+        const poemContent = document.getElementById('poem-content');
+        if (poemContent && poems[currentPoemIndex]) {
+            poemContent.innerHTML = `
+                <h3>${poems[currentPoemIndex].title}</h3>
+                <p>${poems[currentPoemIndex].content}</p>
+            `;
+        }
+    }
+
+    function showNextPoem() {
+        currentPoemIndex = (currentPoemIndex + 1) % poems.length;
+        displayCurrentPoem();
+    }
+
+    // ====== CONVERSATION FUNCTIONALITY ======
+    // Add function to fetch conversations from API
+    async function fetchConversations() {
+        try {
+            const response = await fetch('http://localhost:3000/api/conversations');
+            conversations = await response.json();
+            displayConversations();
+        } catch (err) {
+            console.error('Error fetching conversations:', err);
+        }
+    }
+
+    // Update postMessage function to restrict to Yasmine only
+    async function postMessage() {
+        if (currentUser !== 'yasmine') {
+            alert('Only Yasmine can post new messages.');
+            return;
+        }
+
+        const messageText = document.getElementById('message-text').value.trim();
+        if (!messageText) {
+            alert('Please write a message before posting.');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:3000/api/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    from: currentUser,
+                    text: messageText,
+                    image: capturedImage
+                })
             });
-        }
 
-        // Start countdown
-        updateCountdown();
-        startCountdownInterval();
-    }
-
-    // Return to home page
-    function returnToHome() {
-        showInitialState();
-        visitorName.value = '';
-        currentUser = '';
-        hasVisitedToday = false;
-        stopCountdownInterval();
-    }
-
-    // Countdown functionality
-    let countdownInterval;
-
-    function startCountdownInterval() {
-        countdownInterval = setInterval(updateCountdown, 1000);
-    }
-
-    function stopCountdownInterval() {
-        if (countdownInterval) {
-            clearInterval(countdownInterval);
+            if (!response.ok) throw new Error('Failed to post message');
+            
+            await fetchConversations();
+            resetMessageForm();
+        } catch (err) {
+            console.error('Error posting message:', err);
+            alert('Failed to post message. Please try again.');
         }
     }
 
-    function updateCountdown() {
-        const now = new Date();
-        const tomorrow = new Date(now);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(0, 0, 0, 0);
+    // Update postReply function to restrict to Abdoul only
+    async function postReply(messageId) {
+        if (currentUser !== 'abdoul') {
+            alert('Only Abdoul can reply to messages.');
+            return;
+        }
+
+        const replyText = document.getElementById(`reply-${messageId}`).value.trim();
+        if (!replyText) return;
+
+        try {
+            const response = await fetch('http://localhost:3000/api/replies', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    messageId: messageId,
+                    from: currentUser,
+                    text: replyText
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to post reply');
+            
+            await fetchConversations();
+            document.getElementById(`reply-${messageId}`).value = '';
+        } catch (err) {
+            console.error('Error posting reply:', err);
+            alert('Failed to post reply. Please try again.');
+        }
+    }
+
+    function displayConversations() {
+        const conversationDisplay = document.getElementById('conversation-display');
+        conversationDisplay.innerHTML = conversations.map(message => `
+            <div class="message-card ${message.from_user === currentUser ? 'my-message' : ''}">
+                <div class="message-header">
+                    <strong>${message.from_user === 'yasmine' ? '🌸 Yasmine' : '👋 Abdoul'}</strong>
+                    <small>${new Date(message.timestamp).toLocaleString()}</small>
+                </div>
+                ${message.image_data ? `<img src="${message.image_data}" alt="Shared photo">` : ''}
+                <p>${message.message_text}</p>
+                
+                <div class="replies">
+                    ${message.replies.map(reply => `
+                        <div class="reply ${reply.from === currentUser ? 'my-reply' : ''}">
+                            <small>${reply.from === 'yasmine' ? '🌸' : '👋'} ${new Date(reply.timestamp).toLocaleString()}</small>
+                            <p>${reply.text}</p>
+                        </div>
+                    `).join('')}
+                </div>
+
+                ${currentUser === 'abdoul' ? `
+                    <div class="reply-form">
+                        <input type="text" id="reply-${message.id}" placeholder="Write a reply...">
+                        <button onclick="postReply(${message.id})">Reply</button>
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+    }
+
+    // ====== NAVIGATION ======
+    function showPoemSection() {
+        conversationSection.classList.add('hidden');
+        poemSection.classList.remove('hidden');
+        displayCurrentPoem();
+    }
+
+    function showConversationSection() {
+        poemSection.classList.add('hidden');
+        conversationSection.classList.remove('hidden');
+        displayConversations();
+    }
+
+    // ====== CAMERA FUNCTIONALITY ======
+    async function initializeCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'user' }, 
+                audio: false 
+            });
+            currentStream = stream;
+            cameraFeed.srcObject = stream;
+            document.getElementById('camera-controls').classList.remove('hidden');
+        } catch (err) {
+            console.error('Camera error:', err);
+            document.getElementById('camera-container').innerHTML = 
+                '<p>Unable to access camera. Please check permissions.</p>';
+        }
+    }
+
+    function capturePhoto() {
+        const context = photoCanvas.getContext('2d');
+        photoCanvas.width = cameraFeed.videoWidth;
+        photoCanvas.height = cameraFeed.videoHeight;
+        context.drawImage(cameraFeed, 0, 0);
+        capturedImage = photoCanvas.toDataURL('image/png');
         
-        const timeLeft = tomorrow - now;
-        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-        
-        const countdownTimer = document.getElementById('countdown-timer');
-        if (countdownTimer) {
-            countdownTimer.textContent = `${hours}h ${minutes}m ${seconds}s`;
-        }
+        photoCanvas.classList.remove('hidden');
+        cameraFeed.classList.add('hidden');
+        captureBtn.textContent = 'Retake Photo';
     }
 
-    // Event Listeners
-    loginBtn.addEventListener('click', handleLogin);
-    returnHomeBtn.addEventListener('click', returnToHome);
+    function resetMessageForm() {
+        document.getElementById('message-text').value = '';
+        capturedImage = null;
+        photoCanvas.classList.add('hidden');
+        cameraFeed.classList.remove('hidden');
+        captureBtn.textContent = 'Take Photo';
+    }
 
-    // Like button handler
-    document.addEventListener('click', function(e) {
-        if (e.target && e.target.id === 'like-btn') {
-            hasVisitedToday = true;
-            showThankYouPage();
-        }
-    });
-
-    // Next button handler
-    document.addEventListener('click', function(e) {
-        if (e.target && e.target.id === 'next-btn') {
-            currentPoemIndex = (currentPoemIndex + 1) % poems.length;
-            displayCurrentPoem();
-        }
-    });
-}); 
+    // Start the application
+    initialize();
+});

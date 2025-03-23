@@ -1,80 +1,73 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdoul & Yasmine's Poetry Corner</title>
+    <title>Poetry Conversations</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
+        <!-- Login Page -->
         <div id="login-page">
             <h1>Welcome to Our Poetry Corner</h1>
-            <div id="current-date"></div>
+            <p>Today is: <span id="current-date"></span></p>
             <div class="login-form">
-                <input type="text" id="visitor-name" placeholder="Please enter your name..." />
+                <input type="text" id="visitor-name" placeholder="Enter your name" required>
                 <button id="login-btn">Enter</button>
             </div>
         </div>
 
-        <div id="landing-page" class="hidden">
-            <h1>Welcome to Abdoul & Yasmine's Poetry Corner</h1>
-            <div id="current-date"></div>
-            <p class="welcome-note">Step into our world of words and emotions...</p>
-            <button id="mood-btn">Are you ready for today's poem?</button>
+        <!-- Navigation Buttons -->
+        <div class="nav-buttons">
+            <button id="show-poem-btn" class="hidden">View Poems</button>
+            <button id="show-conversation-btn" class="hidden">View Conversations</button>
         </div>
 
+        <!-- Poem Section -->
         <div id="poem-section" class="hidden">
-            <h2>Poem of the Day</h2>
-            <div id="poem-content"></div>
-            <div class="feedback-buttons">
-                <button id="like-btn">I loved it! ❤️</button>
-                <button id="next-btn">Show me another</button>
+            <header>
+                <h2>Today's Poem</h2>
+            </header>
+            
+            <div id="poem-content" class="poem-container">
+                <!-- Poem content will be inserted here -->
+            </div>
+
+            <div class="poem-controls">
+                <button id="next-btn">Next Poem</button>
             </div>
         </div>
 
-        <div id="note-section" class="hidden">
-            <h2>Share Your Thoughts</h2>
-            <div id="camera-container">
-                <video id="camera-feed" autoplay playsinline></video>
-                <canvas id="photo-canvas" class="hidden"></canvas>
-                <div id="camera-controls" class="hidden">
-                    <button id="switch-camera">Switch Camera</button>
-                    <button id="capture-btn">Capture Photo</button>
-                    <button id="save-photo" class="hidden">Use Photo</button>
-                </div>
-            </div>
-            <div class="note-input">
-                <textarea id="written-note" placeholder="Write your thoughts about the poem..."></textarea>
-                <button id="post-note-btn">Post Note</button>
-            </div>
-            <div id="notes-display"></div>
-        </div>
+        <!-- Conversation Section -->
+        <div id="conversation-section" class="hidden">
+            <header>
+                <h2>Our Conversations</h2>
+            </header>
 
-        <div id="thank-you-page" class="hidden">
-            <div class="thank-you-content">
-                <h2>Thank You, Yasmine! 🌸</h2>
-                <div class="sparkles-animation"></div>
-                <p class="daily-message">Your thoughts have been captured for today</p>
-                <div class="today-stats">
-                    <div id="current-date-display"></div>
-                    <div id="post-time"></div>
-                </div>
-                <div class="farewell-message">
-                    <p>Come back tomorrow for a new poem and more moments to share!</p>
-                    <div class="next-poem-time">
-                        <p>Next poem will be available in:</p>
-                        <div id="countdown-timer"></div>
+            <div class="message-form">
+                <div class="camera-section">
+                    <video id="camera-feed" autoplay playsinline></video>
+                    <canvas id="photo-canvas" class="hidden"></canvas>
+                    <div id="camera-controls">
+                        <button id="capture-btn">Take Photo</button>
                     </div>
                 </div>
-                <div id="abdoul-message" class="hidden"></div>
-                <div class="hearts-animation"></div>
-                <button id="return-home" class="return-button">Return to Home</button>
+
+                <textarea id="message-text" 
+                          placeholder="Share your thoughts about the poems..."
+                          rows="4"></textarea>
+                <button id="post-message-btn">Post Message</button>
+            </div>
+
+            <div id="conversation-display">
+                <!-- Conversations will be displayed here -->
             </div>
         </div>
     </div>
+
+    <!-- Scripts -->
     <script src="poems.js"></script>
     <script src="script.js"></script>
 </body>
-</html> 
+</html>
